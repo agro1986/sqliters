@@ -5,3 +5,4 @@ authors = ["Agro Rachmatullah <agro1986@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+libc = "0.2.51"

@@ -14,6 +14,10 @@ enum MetaCommandErrorKind {
 }
 
 impl MetaCommandError {
+    pub fn new(kind: MetaCommandErrorKind) -> Self {
+        Self { kind }
+    }
+
     pub fn kind(&self) -> &MetaCommandErrorKind {
         &self.kind
     }
@@ -36,6 +40,10 @@ enum PrepareStatementErrorKind {
 }
 
 impl PrepareStatementError {
+    pub fn new(kind: PrepareStatementErrorKind) -> Self {
+        Self { kind }
+    }
+
     pub fn kind(&self) -> &PrepareStatementErrorKind {
         &self.kind
     }
@@ -48,19 +56,50 @@ impl PrepareStatementError {
 }
 
 struct Statement {
-
+    kind: StatementKind,
 }
 
-fn prepare_statement(input_buffer: &str) -> Result<Statement, PrepareStatementError> {
-    if input_buffer == "test" {
-        Ok(Statement{})
-    } else {
-        Err(PrepareStatementError{kind: PrepareStatementErrorKind::UnrecognizedStatement})
+enum StatementKind {
+    Insert,
+    Select,
+}
+
+impl Statement {
+    pub fn insert() -> Self {
+        Self { kind: StatementKind::Insert }
+    }
+
+    pub fn select() -> Self {
+        Self { kind: StatementKind::Select }
+    }
+
+    pub fn kind(&self) -> &StatementKind {
+        &self.kind
     }
 }
 
-fn execute_statement(s: &Statement) {
 
+fn prepare_statement(input_buffer: &str) -> Result<Statement, PrepareStatementError> {
+    if input_buffer.starts_with("insert") {
+        return Ok(Statement::insert());
+    }
+
+    if input_buffer == "select" {
+        return Ok(Statement::select());
+    }
+
+    Err(PrepareStatementError{kind: PrepareStatementErrorKind::UnrecognizedStatement})
+}
+
+fn execute_statement(s: &Statement) {
+    match s.kind() {
+        StatementKind::Select => {
+            println!("This is where we would do a select");
+        }
+        StatementKind::Insert => {
+            println!("This is where we would do an insert");
+        }
+    }
 }
 
 fn print_prompt() {
@@ -73,7 +112,7 @@ fn do_meta_command(input_buffer: &str) -> Result<(), MetaCommandError> {
         process::exit(libc::EXIT_SUCCESS);
     }
 
-    Err(MetaCommandError{kind: MetaCommandErrorKind::UnrecognizedCommand})
+    Err(MetaCommandError::new(MetaCommandErrorKind::UnrecognizedCommand))
 }
 
 fn main() {
